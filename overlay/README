@@ -1,0 +1,6 @@
+overlay test.
+
+extract layers from modified image while compare to base image. 
+
+then synthesis the layers into base image in ANOTHER node.
+
