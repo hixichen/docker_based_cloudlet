@@ -1,6 +1,4 @@
-
-[Info]:
-
+Summer project: case for container-based cloudlet
 author: chen xi
 mail: chenx@andrew.cmu.edu
 
@@ -8,13 +6,11 @@ mail: chenx@andrew.cmu.edu
 python 2.7.
 ubuntu 14.04.
 
-
 [How to use]:
+[need root privilege now]
 python cloudlet.py [argv]
 
-
 [support command]:
-
 cloudlet check
 cloudlet -v
 cloudlet -h  
