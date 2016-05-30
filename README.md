@@ -1,10 +1,4 @@
 
-
-python  文件共享变量。
-python 类 成员变量 处理
-
-python
-
 [Info]:
 
 author: chen xi
@@ -26,6 +20,7 @@ cloudlet -v
 cloudlet -h  
 cloudlet help
 
+#receive
 cloudlet service -l
 
 
@@ -34,14 +29,8 @@ cloudlet fetch [service name]
 cloudlet search [service name]
 cloudlet overlay  new_image base image '-o [image_name]'
 
-
-
+#for migrate
 cloudlet migrate [container id] -t [destionation address]
-
-
-
-
-
 
 
 
