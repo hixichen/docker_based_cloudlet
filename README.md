@@ -1,5 +1,5 @@
 Summer project: case for container-based cloudlet
-author: chen xi
+
 mail: chenx@andrew.cmu.edu
 
 [Test Environment]:
