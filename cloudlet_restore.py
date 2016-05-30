@@ -30,7 +30,7 @@ def restore(task_id, label):
     image_name = label_ar[1]
     image_id = label_ar[2]
 
-    logging.error(label_ar)
+    logging.debug(label_ar)
 
     # verify image.
     con_id = pre_restore(image_name, con_name)
