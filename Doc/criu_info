@@ -1,0 +1,62 @@
+
+CRIU:  https://criu.org/Main_Page
+
+Checkpoint/Restore In Userspace, or CRIU (pronounced kree-oo, IPA: /krɪʊ/, Russian: криу), is a software tool for Linux operating system. Using this tool, you can freeze a running application (or part of it) and checkpoint it to a hard drive as a collection of files. You can then use the files to restore and run the application from the point it was frozen at. The distinctive feature of the CRIU project is that it is mainly implemented in user space.
+
+CRIU docker:    https://criu.org/Docker
+
+
+
+Install on ubuntu 14.04:    https://github.com/hixichen/CRIU_docker
+
+
+1.complile the kernel to support CRIU.
+
+  ->Config the kernel. 
+  ->Complile and get the kernel.
+      https://criu.org/Installation
+
+  version information:
+
+  vagrant@vm1:~$ uname -r
+  3.13.11-ckt22
+
+
+  vagrant@vm1:~$ lsb_release -a
+  No LSB modules are available.
+  Distributor ID: Ubuntu
+  Description:  Ubuntu 14.04.2 LTS
+  Release:  14.04
+  Codename: trusty
+  
+  
+  Issue:
+
+  About protobuf: search and install this:
+      libprotobuf-c1.deb
+  
+  kernel version:
+      the handle book of criu shows that we need to patch the kernel for version 3.19.
+    https://criu.org/Docker
+    
+    obviously , we need to apply the issue to the kernel before 3.19. 
+    This need to be check more.And the upstream kernel patch also shows here.
+  
+      https://criu.org/Upstream_kernel_commits 
+  
+  
+  
+
+2.install CRIU and docker. 
+
+  vagrant@vm1:~$ docker -v
+  Docker version 1.9.0-dev, build 792fc89, experimental
+
+  criu.deb:  2.0-2ubuntu1 (lastest version.)
+  --may not complie the criu by your own.There are some dependences.
+
+
+3.After 1&2, we can user docker checkpoint and docker restore now.
+
+docker checkpoint mytest
+docker restore mytest.

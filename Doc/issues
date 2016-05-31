@@ -1,2 +1,13 @@
-[Docker issue]
+[Docker issue]:
       /dev/null issue
+
+      - solution:  vagrant ssh vm2 -- 'docker run --name=foo -d ubuntu tail -f /dev/null && docker rm -f foo'
+
+[other]:
+ Docker fork with CRIU support Known Issues:
+    Currently, networking is broken in this PR.
+    Although it's implemented at the libcontainer level, the method used no longer works since the introduction of libnetwork.
+    There are likely several networking related issues to work out, like:
+    - ensuring IPs are reserved across daemon restarts
+    - ensuring port maps are reserved
+   - deciding how to deal with network resources in the "new container" model

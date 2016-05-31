@@ -1,0 +1,15 @@
+
+AUFS:  https://docs.docker.com/engine/userguide/storagedriver/aufs-driver/
+       https://en.wikipedia.org/wiki/Aufs
+
+
+AUFS (Another Union File System) is an advanced multi-layered unification filesystem. Aufs was originally a re-design and re-implementation of the popular UnionFS, however after adding many new original ideas it became entirely separate from UnionFS. Aufs is considered a UnionFS alternative since it supports many of the same features.
+
+
+overlayFS:
+Note: The OverlayFS filesystem was merged into the upstream Linux kernel 3.18 and is now Docker's preferred filesystem (instead of AUFS). However, there is a bug in OverlayFS that reports the wrong mnt_id in /proc/<pid>/fdinfo/<fd> and the wrong symlink target path for /proc/<pid>/<fd>. Fortunately, these bugs have been fixed in the kernel v4.2-rc2.
+
+
+overlayFS vs AUFS:
+
+https://sthbrx.github.io/blog/2015/10/30/docker-just-stop-using-aufs/

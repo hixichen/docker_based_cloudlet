@@ -1,0 +1,29 @@
+
+
+#update :    
+As of Docker 1.10, image layer IDs do not correspond to the names of the directories that contain their data
+
+
+
+1. use xdelta to get the binay diff.
+
+  - frist user 'docker save ' get these two images. [docker export will lost the environment information]
+  - xdelta compare...
+
+2. image layers  locate in /var/lib/docker/diff/[image id]/
+
+  for each layer, we need get :
+
+     layer info:
+         Json file: /var/lib/docker/graph
+         layer tar file: /var/lib/docker/aufs/diff
+         version :   1.0
+
+
+    and also we need the repositories file.
+
+
+link:
+
+https://github.com/larsks/undocker/
+http://blog.oddbit.com/2015/02/13/unpacking-docker-images/
