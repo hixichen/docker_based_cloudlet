@@ -3,16 +3,16 @@ Summer project: case for container-based cloudlet
 mail: chenx@andrew.cmu.edu
 
 
-[Test Environment]:
+#[Test Environment]:
 
 python 2.7.
 
 ubuntu 14.04.
 
 
-[How to use]:
+#[How to use]:
 
-#need root privilege now
+!need root privilege now
 
         python cloudlet.py [argv]
         example:
@@ -28,7 +28,7 @@ ubuntu 14.04.
         $python cloudlet.py service -l
         
 
-[support command]:
+#[support command]:
 
         cloudlet check
 
@@ -39,12 +39,12 @@ ubuntu 14.04.
         cloudlet help
 
 
-[receive and restore]:
+#[receive and restore]:
 
         cloudlet service -l
 
 
-[overlay]:
+#[overlay]:
 
         cloudlet fetch [service name]
 
@@ -53,7 +53,7 @@ ubuntu 14.04.
         cloudlet overlay  new_image  base image '-o [image_name]'
 
 
-[migrate]:
+#[migrate]:
 
         cloudlet migrate [container id] -t [destionation address]
 
