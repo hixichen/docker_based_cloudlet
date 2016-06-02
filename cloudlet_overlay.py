@@ -23,7 +23,8 @@ import subprocess as sp
 from docker import Client
 from cloudlet_utl import *
 
-class  overlay:
+
+class overlay:
 
     def __init__(self, modified_image, base_image):
         self.m_image = modified_image
@@ -38,14 +39,14 @@ class  overlay:
         name = name.split("'")[1]
         version = version.split("'")[0]
         id = (json_file[0]['Id'])
-        label = name + ":" + version + ":" + id
+        label = name + "-" + version + "-" + id
         logging.info(label)
         return label, json_file
 
     def get_images_info(self, modified_image, base_image):
         # TODO
         # docker_api_version = get_api_v()
-        # print(api_v)
+        # logging.debug(api_v)
 
         self.label, json_m = self.get_image_label(modified_image)
         self.base_label, json_b = self.get_image_label(base_image)
@@ -66,6 +67,7 @@ class  overlay:
             return False
 
         self.set = layers_set
+        logging.debug(layers_set)
         return True
 
     def extract_layers(self, m_image):
@@ -103,13 +105,14 @@ class  overlay:
         repos_file = open("repositories", "w")
 
         cont = '{"name":{"version":"id"}}\n'
-        temp_array = self.label.split(":")
+        temp_array = self.label.split("-")
 
         cont = cont.replace("name", temp_array[0])
         cont = cont.replace("version", temp_array[1])
         cont = cont.replace("id", temp_array[2])
         repos_file.write(cont)
         repos_file.close()
+        logging.debug(cont)
 
         image_info = open("base_image", "w")
         image_info.write(self.base_label)
@@ -143,67 +146,62 @@ class  overlay:
         return True
 
     def synthesis(self, overlay_file):
+        
         # overlay file.
-        t1 = time.time()
-
         syn_image = self.m_image + '-synthesis.tar'
 
         # caeate new tar file.
         if check_file(syn_image):
             os.remove(syn_image)
 
+        logging.info(overlay_file)
+        t1 = time.time()
         dir = random_str()
         os.mkdir(dir)
 
-        logging.info(overlay_file)
-        tar = tarfile.TarFile.open(overlay_file, 'r:gz')
-        tar.extractall(dir)
-        tar.close()
+        overlay = tarfile.TarFile.open(overlay_file, 'r:gz')
 
-        # check information
-        info_file = './' + dir + '/' + 'base_image'
-        if not check_file(info_file):
-            logging.error('overlay file lacks of base image')
-            return False
+        try:
+            image_info = overlay.getmember('./base_image')
+            info_file = overlay.extractfile(image_info)
+            name, version, id = str(info_file.read()).split("-")
+            info_file.close()
 
-        image_fd = open(info_file)
-        image_str = image_fd.read()
-        name, version, id = str(image_str).split(":")
-        os.remove(info_file)
+            base_file = name + '.tar'
+            basetar = tarfile.TarFile.open(base_file, 'r')
+            basetar.extractall(dir)
+            basetar.close()
+            # verify
+            if not check_dir(dir + '/' + id):
+                logging.error('!base image not match')
+                return False
 
-        # check the base image file.
-        self.base_image = name
-        base_file = name + '.tar'
-        if not check_file(base_file):
-            logging.error("base image tar file is not exit")
-            return False
+            overlay.extractall(dir)
+            overlay.close()
+            os.remove(dir + '/base_image')
 
-        basetar = tarfile.TarFile.open(base_file, 'r')
-        basetar.extractall(dir)
-        basetar.close()
+            newtar = tarfile.TarFile.open(syn_image, 'w')
+            newtar.add(dir + '/', arcname="./")
+            newtar.close()
 
-        # verify
-        if not check_dir(dir + '/' + id):
-            logging.error('!base image not match')
-            return False
-
-        newtar = tarfile.TarFile.open(syn_image, 'w')
-        newtar.add(dir + '/', arcname="./")
-        newtar.close()
-
+        except KeyError:
+            logging.error('base image info not in overlay(%s)' % overlay_file)
+        except OSError as err:
+            logging.error(err)
+        finally:
+            shutil.rmtree(dir)
 
         t2 = time.time()
-
         # docker load.
-        shutil.rmtree(dir)
         cmd = 'docker load -i ' + syn_image
-        sp.call(cmd,shell=True)
+        sp.call(cmd, shell=True)
         t3 = time.time()
 
-        logging.debug("tar file time %s" % (t2 - t1))
-        logging.debug("load time %s" % (t3 - t2))
+        print("tar file time %s" % (t2 - t1))
+        print("load time %s" % (t3 - t2))
+        print("total synethsis time %s" % (t3 - t1))
         # if everythin goes well, delete the tar file.
-        os.remove(syn_image)
+        # os.remove(syn_image)
 
         '''
             cli = Client(version='1.21')  

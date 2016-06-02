@@ -7,6 +7,9 @@ from cloudlet_memory import cloudlet_memory
 from docker import Client
 from cloudlet_utl import *
 import logging
+import time
+
+start_time = ''
 
 BUF_SIZE = 4096
 
@@ -23,7 +26,7 @@ class cloudlet_socket:
         try:
             self.socket.connect((HOST, PORT))
         except Exception, e:
-            print 'Error connecting to server:%s' % e
+            logging.error('Error connecting to server:%s' % e)
             return False
 
     def send_file(self, file_path):
@@ -61,7 +64,6 @@ def get_con_info(name):
 def check_container_status(id):
     cli = Client(version='1.21')
     out = cli.containers(id)
-    print(out)
     lines = str(out)
     if 'Id' in lines:
         logging.info('id get by docker-py:%s' % out[0]['Id'])
@@ -95,7 +97,8 @@ class handoff:
             mm_image_size = os.path.getsize(mm_image)
 
             msg = 'msg:' + self.task_id + ':' + self.label + \
-                ':' + str(fs_image_size) + ':' + str(mm_image_size)
+                ':' + str(fs_image_size) + ':' + str(mm_image_size)  \
+                + ':' + start_time
 
             logging.debug(msg)
 
@@ -125,10 +128,12 @@ class handoff:
 
             return True
         except Exception, e:
-            print 'Error,socket send/recv file  failed:%s' % e
+            logging.error('Error,socket  failed:%s' % e)
             return False
 
     def run(self):
+        global start_time
+        start_time = time.time()
 
         fs_handle = cloudlet_filesystem(self.con_id, self.task_id)
         if not fs_handle.checkpoint():
@@ -143,7 +148,6 @@ class handoff:
         if not mm_handle.dump(self.con):
             logging.error("memory dump failed")
             return False
-
         self.send_image(fs_handle.image_path(), mm_handle.image_path())
-
+        print('migration start time: %s' % t1)
         return True

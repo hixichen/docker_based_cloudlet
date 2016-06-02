@@ -153,6 +153,7 @@ def send_request(sock, input_data):
                     index += 1
                     #print "[%03d/%d] Sent ACK(%d), acc (%f, %f)" % (index, loop_length, token_id, x_acc, y_acc)
     except Exception, e:
+        #print(e)
         sock.close()
         sys.exit(1)
 

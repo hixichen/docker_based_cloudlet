@@ -2,11 +2,14 @@
 #Version 12.04
 FROM ubuntu:precise
 MAINTAINER chen xi
-RUN apt-get update && apt-get install -y \
+RUN apt-get update 
+RUN apt-get install -y \
 	 libcv-dev libglew-dev libdevil-dev libhighgui-dev libcvaux-dev gcc-4.4 g++-4.4 libstdc++6-4.4-dev libopencv-dev freeglut3-dev \
 	&& rm -rf /var/lib/apt/lists/*
 COPY moped /home/moped
 WORKDIR /home/moped
 RUN chmod 0766 moped_server
+EXPOSE 9092
+#CMD sh -c 'ln -s /dev/null /dev/raw1394'; ./moped_server
 ENTRYPOINT ["./moped_server"]
 CMD ["-h"]

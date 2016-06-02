@@ -4,8 +4,9 @@
 import random
 import string
 import os.path
-import logging
+
 base_dir = '/var/lib/docker/'
+
 
 def isBlank(inString):
     if inString and inString.strip():
@@ -19,11 +20,13 @@ def check_dir(file_path):
     else:
         return False
 
+
 def check_file(file):
     if os.path.isfile(file):
         return True
     else:
         return False
+
 
 def random_str(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))

@@ -6,7 +6,9 @@ import logging
 import SocketServer  # for python 2.7,    sockerserver for python3.x
 from cloudlet_restore import restore
 from cloudlet_utl import *
+import time
 BUF_SIZE = 4096
+
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -43,11 +45,13 @@ class cloudlet_handler(SocketServer.BaseRequestHandler):
         label = str_array[2]
         fs_size = int(str_array[3])
         mm_size = int(str_array[4])
+        # just for debug.
+        start_time = str_array[5]
 
         self.request.send('msg:success\n')
 
         os.chdir(base_dir + '/tmp')
-        os.system('rm -fr *') #just for debug
+        # os.system('rm -fr *') #just for tiny test
         os.mkdir(task_id)
         os.chdir(task_id)
 
@@ -64,6 +68,9 @@ class cloudlet_handler(SocketServer.BaseRequestHandler):
 
         restore(task_id, label)
         logging.debug('restore end..')
+        end_time = time.time()
+        print('migration time: %s' % (end_time - start_time))
+        print('migration end time: %s' % end_time)
 
 
 class daemon:

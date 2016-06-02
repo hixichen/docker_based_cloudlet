@@ -17,7 +17,7 @@ def pre_restore(base_image, name):
     os.system(delete_op)
 
     create_op = 'docker create --name=' + name + ' ' + base_image
-    # print create_op
+    logging.debug(create_op)
     ret, id = commands.getstatusoutput(create_op)
     logging.info(id)
     return id
@@ -29,7 +29,7 @@ def restore(task_id, label):
     con_name = label_ar[0]
     image_name = label_ar[1]
     image_id = label_ar[2]
-
+    logging.debug('keep image id for verify %s ' % image_id)
     logging.debug(label_ar)
 
     # verify image.

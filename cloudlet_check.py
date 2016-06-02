@@ -17,7 +17,7 @@ def cloudlet_check():
         logging.error('cloudlet environment check failed')
         return False
 
-    print('ok, your system seems good')
+    print('\nok, your system seems good')
     return True
 
 
