@@ -2,14 +2,17 @@
 #Version 12.04
 FROM ubuntu:precise
 MAINTAINER chen xi
-RUN apt-get update 
-RUN apt-get install -y \
-	 libcv-dev libglew-dev libdevil-dev libhighgui-dev libcvaux-dev gcc-4.4 g++-4.4 libstdc++6-4.4-dev libopencv-dev freeglut3-dev \
-	&& rm -rf /var/lib/apt/lists/*
+
 COPY moped /home/moped
 WORKDIR /home/moped
-RUN chmod 0766 moped_server
-EXPOSE 9092
-#CMD sh -c 'ln -s /dev/null /dev/raw1394'; ./moped_server
+
+RUN apt-get update && apt-get install -y libgomp1 libglew1.6 && \
+    dpkg -i freeglut3_2.6.0-1ubuntu2_amd64.deb && \
+    apt-get install -y libdevil-dev libopencv-core2.3 libopencv-imgproc2.3 libopencv-highgui2.3 \
+    libopencv-ml2.3 libopencv-features2d2.3 \
+    libopencv-calib3d2.3 libopencv-objdetect2.3 libopencv-contrib2.3 libopencv-legacy2.3 \
+	  && rm -rf /var/lib/apt/lists/* && rm freeglut*
+
+#EXPOSE 9092
 ENTRYPOINT ["./moped_server"]
 CMD ["-h"]
