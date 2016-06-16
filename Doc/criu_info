@@ -5,58 +5,31 @@ Checkpoint/Restore In Userspace, or CRIU (pronounced kree-oo, IPA: /krɪʊ/, Rus
 
 CRIU docker:    https://criu.org/Docker
 
-
-
+1.kernel requirement
 Install on ubuntu 14.04:    https://github.com/hixichen/CRIU_docker
 
+But ,the better choice is to use ubuntu15.04, the kernel version is 3.19.
 
-1.complile the kernel to support CRIU.
+2.Native docker checkpoint/restore
 
-  ->Config the kernel. 
-  ->Complile and get the kernel.
-      https://criu.org/Installation
+Docker requirement:    thanks to Ross Boucher.
+https://github.com/boucher/docker/releases
+https://github.com/boucher/docker/releases/tag/v1.9.0-experimental-cr.1
 
-  version information:
-
-  vagrant@vm1:~$ uname -r
-  3.13.11-ckt22
-
-
-  vagrant@vm1:~$ lsb_release -a
-  No LSB modules are available.
-  Distributor ID: Ubuntu
-  Description:  Ubuntu 14.04.2 LTS
-  Release:  14.04
-  Codename: trusty
+$mv docker-1.9.0-dev /usr/bin/docker
+$docker daemon &
   
+install CRIU
   
-  Issue:
+$ git clone –b v2.2 https://github.com/xemul/criu.git
+$ cd criu/
 
-  About protobuf: search and install this:
-      libprotobuf-c1.deb
-  
-  kernel version:
-      the handle book of criu shows that we need to patch the kernel for version 3.19.
-    https://criu.org/Docker
-    
-    obviously , we need to apply the issue to the kernel before 3.19. 
-    This need to be check more.And the upstream kernel patch also shows here.
-  
-      https://criu.org/Upstream_kernel_commits 
-  
-  
-  
-
-2.install CRIU and docker. 
-
-  vagrant@vm1:~$ docker -v
-  Docker version 1.9.0-dev, build 792fc89, experimental
-
-  criu.deb:  2.0-2ubuntu1 (lastest version.)
-  --may not complie the criu by your own.There are some dependences.
-
+apt-get install -y libprotobuf-dev libprotobuf-c0-dev protobuf-c-compiler \
+protobuf-compiler python-protobuf libnl-3-dev pkg-config libcap-dev asciidoc
 
 3.After 1&2, we can user docker checkpoint and docker restore now.
 
 docker checkpoint mytest
 docker restore mytest.
+
+please refer to issues for checkpoint/restore issue.
