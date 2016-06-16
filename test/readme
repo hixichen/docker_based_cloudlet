@@ -2,3 +2,14 @@
 
 test case1:
 docker run -d --name t1  ubuntu /bin/sh -c 'i=0; touch test; echo 'file test' > test; while true; do echo $i && cat test; i=$(expr $i + 1); sleep 1; done'
+
+
+test case2: 
+
+test.sh
+
+#!/bin/bash
+while true; do
+  python moped_client.py -i input
+  sleep 0.5
+done
