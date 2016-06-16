@@ -6,6 +6,12 @@ docker run -d --name t1  ubuntu /bin/sh -c 'i=0; touch test; echo 'file test' > 
 
 test case2: 
 
+how to build moped:  docker run --name mopedBuild ubuntu:precise
+apt-update && apt-get install -y libcv-dev libglew-dev libdevil-dev libhighgui-dev \
+libcvaux-dev gcc-4.4 g++-4.4 libstdc++6-4.4-dev libopencv-dev freeglut3-dev
+
+
+
 test.sh
 
 #!/bin/bash
