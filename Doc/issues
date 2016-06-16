@@ -11,3 +11,46 @@
     - ensuring IPs are reserved across daemon restarts
     - ensuring port maps are reserved
    - deciding how to deal with network resources in the "new container" model
+   
+ [CRIU issue]:
+ 
+ TCP closing state. https://github.com/xemul/criu/issues/62
+      CRIU donot support for socket state 'TCP_closing' now.
+      After check the code of moped, I found it was cased by the thread method it used.
+      The manage thread will accept the socket connection and put the socket fd to the buffer. 
+      Handle thread finish the socket fd from the buffer. 
+      It DIDNOT close the socket,and leave it until the buffer is full.
+      And socket will stay in TCP_ClOSING.
+      I had hijacked the code of moped to let it work in one thread and close it immediately. It works fine.
+      CRIU had a pending kernel patch for this . 
+            https://criu.org/Upstream_kernel_commits  Reference  013655
+            https://lists.openvz.org/pipermail/criu/2014-April/013655.html
+            tcp: allow to repair a tcp connections in closing states
+
+      two ways to walk around this issue.
+
+            1. change the work way of moped.
+
+            2. ignore the state <in our case , the state can be treat as TCP_ClOSE>
+
+            I choose 2. code:  https://github.com/hixichen/criu_hijack/commit/60e0b7c80071d05697507366f11860f427161f5f
+
+[Issue2:]  Bridge network mode cause the restore pipe failure. 
+
+           Docker network has 4 work mode.  Bridge mode  is the default one.   
+
+           For bridge mode , docker will create two processes for one container. and connect them with pipe.
+
+           however, one issue of CRIU is:  https://criu.org/Inheriting_FDs_on_restore#Example_3_-_External_files.2C_FIFO-s
+
+           For dump, we need to mark the external pipe , and restore it with inherit way. without this, restore socket state is ok.
+
+           But the pipe is broken. <may need to analysis more.>
+
+
+           way to fix:   use option '--net=host' to  use host mode network .
+
+           In host mode, the container will directly use the network configuration from the host.
+
+           in other word, container will only have one process without fd inherit issue.
+           
