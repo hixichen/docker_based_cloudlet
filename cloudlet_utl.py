@@ -4,6 +4,7 @@
 import random
 import string
 import os.path
+import logging
 
 base_dir = '/var/lib/docker/'
 
