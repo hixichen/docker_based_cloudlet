@@ -6,13 +6,18 @@ mail: chenx@andrew.cmu.edu
 #[Test Environment]:
 
 python 2.7
+
 ubuntu 14.04
+
 criu 2.2
 
 #[Dependency]:
-apt-get install python-dev 
+apt-get install python-dev
+
 apt-get install python-pip 
+
 pip install docker-py 
+
 pip install netifaces 
 
 #[How to use]:
