@@ -8,7 +8,14 @@ import tarfile
 from cloudlet_filesystem import cloudlet_filesystem
 from cloudlet_memory import cloudlet_memory
 from cloudlet_utl import *
-import subprocess as sp
+import time
+
+
+def lz4_uncompress(in_name='memory.lz4', out_name='pages-1.img'):
+    cmd = 'lz4 -d ' + in_name + ' ' + out_name
+    logging.info(cmd)
+    sp.call(cmd, shell=True)
+    os.remove(in_name)
 
 
 class restore:
@@ -56,32 +63,38 @@ class restore:
 
         return True
 
-    def unpack_img(self, name):
+    def unpack_img(self, tar_ball, mm_dir):
         os.chdir(self.workdir())
-        if not check_file(name):
+        if not check_file(tar_ball):
             logging.error('file() not exist ,maybe receive error' % dump_mm)
             return False
 
-        t = tarfile.open(name, "r:gz")
+        t = tarfile.open(tar_ball, "r")
         t.extractall()
         t.close()
+        os.chdir(mm_dir)
+        lz4_uncompress()
+        os.chdir('../')
         return True
 
-    def premm_restore(self, premm_name):
-        self.unpack_img(premm_name)
+    def premm_restore(self, premm_name, mm_dir):
+        self.unpack_img(premm_name, mm_dir)
 
     def restore(self, mm_img_name):
-        self.unpack_img(mm_img_name)
+        self.unpack_img(mm_img_name, 'mm')
         image_dir = self.workdir() + '/mm'
 
-        restore_op = 'docker restore --force=true --work-dir=' + image_dir +\
-            ' --image-dir=' + image_dir + ' ' + self.con_id
+        restore_op = 'docker restore --force=true --allow-tcp=true --work-dir=' \
+            + image_dir + ' --image-dir=' + image_dir + ' ' + self.con_id
 
         logging.debug(restore_op)
 
-        if sp.call(restore_op, shell=True) != 0:
+        ret = sp.call(restore_op, shell=True)
+        logging.info(ret)
+
+        if ret != 0:
             logging.error('criu restore failed')
             return False
 
-        shutil.rmtree(self.workdir())
+        # shutil.rmtree(self.workdir())
         return True

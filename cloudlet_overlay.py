@@ -146,7 +146,7 @@ class overlay:
         return True
 
     def synthesis(self, overlay_file):
-        
+
         # overlay file.
         syn_image = self.m_image + '-synthesis.tar'
 

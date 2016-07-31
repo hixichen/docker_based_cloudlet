@@ -79,7 +79,7 @@ def parase(argv):
 if __name__ == '__main__':
 
     # log control.
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     if len(sys.argv) > 5:
         logging.error("too many input arguments.")
 

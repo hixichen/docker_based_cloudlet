@@ -3,36 +3,62 @@
 
 import os
 import tarfile
-import subprocess as sp
-import commands
 from cloudlet_check import cloudlet_check
 from cloudlet_utl import *
+import time
+
+
+def lz4_compress(level, in_name='pages-1.img', out_name='memory.lz4'):
+    cmd = 'lz4 -'+level + ' ' + in_name + ' ' + out_name
+    logging.info(cmd)
+    sp.call(cmd, shell=True)
+    os.remove(in_name)
 
 
 class cloudlet_memory:
 
     def __init__(self, task_id):
         self.task_id = task_id
+        self.predump_cnt = 0
         os.chdir(self.workdir())
 
     def workdir(self):
         return base_dir + 'tmp/' + self.task_id + '/'
 
     def premm_img_path(self):
-        return self.workdir() + self.task_id + '-pre.tar.gz'
+        return self.workdir() + self.task_id + '-' + self.premm_name()+'.tar'
 
     def mm_img_path(self):
-        return self.workdir() + self.task_id + '-mm.tar.gz'
+        return self.workdir() + self.task_id + '-mm.tar'
 
-    def predump(self,pid):
+    def premm_name(self):
+        return 'pre' + str(self.predump_cnt)
 
-        img_dir = './pre'
-        os.mkdir(img_dir)
+    def rename(self):
+        os.rename(self.premm_name(), 'pre')
 
-        pre_img_path= self.workdir() + img_dir
+    def predump(self, pid):
+
+        # predump , we could done the predump as much as we want.
+        # every time, we need the image_dir and parent_dir;
+        os.chdir(self.workdir())
+        self.predump_cnt += 1
+        dir_name = self.premm_name()
+        os.mkdir(dir_name)
+
+        if(self.predump_cnt > 1):
+            parent_dir = 'pre' + str(self.predump_cnt - 1)
+
+            if not check_dir(self.workdir() + parent_dir):
+                logging.error('parent dir not exist')
+
+            parent_path = '../' + parent_dir
+            append_cmd = ' --prev-images-dir ' + parent_path
+        else:
+            append_cmd = ''
 
         predump_sh = 'criu pre-dump -o dump.log -v2 -t ' + \
-            str(pid) + ' --images-dir ' + pre_img_path
+            str(pid) + ' --images-dir ' + dir_name + append_cmd
 
         logging.info(predump_sh)
 
@@ -41,13 +67,17 @@ class cloudlet_memory:
             logging.error('criu dump failed')
             return False
         # package it.
-        name = self.task_id + '-pre.tar.gz'
-        self.pack_img(self.workdir(), name, img_dir)
+        name = self.task_id + '-'+dir_name + '.tar'
+        self.pack_img(self.workdir(), name, dir_name)
         return True
 
-    def pack_img(self,dir, name, path):
-        os.chdir(dir)
-        tar_file = tarfile.open(name, 'w:gz')
+    def pack_img(self, img_dir, name, path):
+        os.chdir(img_dir)
+        os.chdir(path)
+        lz4_compress('1')
+        os.chdir(img_dir)
+
+        tar_file = tarfile.open(name, 'w')
         tar_file.add(path)
         tar_file.close()
 
@@ -57,13 +87,19 @@ class cloudlet_memory:
         return True
 
     def dump(self, con):
+        dump_time_b = time.time()
         logging.debug(con)
+
+        prepath = self.workdir() + './pre'
+        if not check_dir(prepath):
+            logging.debug('pre image is not exist\n')
+
         mm_dir = './mm'
-        #image_dir = self.workdir() + mm_dir
         os.mkdir(mm_dir)
-        img_path=self.workdir()+ mm_dir
+        img_path = self.workdir() + mm_dir
         checkpoint_sh = 'docker checkpoint --image-dir=' + \
-            img_path + ' ' + ' --work-dir=' + img_path + ' --allow-tcp=true ' + con
+            img_path + ' ' + ' --work-dir=' + \
+            img_path + ' --allow-tcp=true ' + con
         logging.debug(checkpoint_sh)
 
         out_msg = sp.call(checkpoint_sh, shell=True)
@@ -71,7 +107,12 @@ class cloudlet_memory:
             logging.error('criu dump failed')
             return False
 
-        name = self.task_id + '-mm.tar.gz'  # eg: /tmp/mytest.tar.gz
+        dump_time_b2 = time.time()
+        name = self.task_id + '-mm.tar'  # eg: /tmp/mytest.tar
 
         self.pack_img(self.workdir(), name, mm_dir)
+        dump_time_e = time.time()
+        logging.debug('dump handle time:%f' % (dump_time_b2 - dump_time_b))
+        logging.debug('dump image pack time:%f' % (dump_time_e - dump_time_b2))
+
         return True

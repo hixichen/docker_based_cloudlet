@@ -12,7 +12,7 @@ class cloudlet_filesystem:
     def __init__(self, con_id, task_id):
         self.con_id = con_id
         self.task_id = task_id
-        self.fs_tar_name = task_id + '-fs.tar.gz'
+        self.fs_tar_name = task_id + '-fs.tar'
         self.con_tar = 'con.tar'
         self.con_init_tar = 'con-init.tar'
 
@@ -51,7 +51,7 @@ class cloudlet_filesystem:
         self.tar_file_without_path(con_init_tar, con_init_path)
 
         '''
-           tar file in fs.tar.gz
+           tar file in fs.tar
         '''
         os.chdir(self.workdir())
 
@@ -61,7 +61,7 @@ class cloudlet_filesystem:
             return false
 
         fs_tar_name = self.fs_tar_name
-        fs_gz = tarfile.TarFile.open(fs_tar_name, 'w:gz')
+        fs_gz = tarfile.TarFile.open(fs_tar_name, 'w')
         fs_gz.add(con_tar)
         fs_gz.add(con_init_tar)
         fs_gz.close()
@@ -98,7 +98,7 @@ class cloudlet_filesystem:
         if not check_file(fs_tar_name):  # check file exist
             logging.error('fs file is not exist')
             return False
-        fs_tar = tarfile.TarFile.open(fs_tar_name, 'r:gz')
+        fs_tar = tarfile.TarFile.open(fs_tar_name, 'r')
         fs_tar.extractall()
         fs_tar.close()
 

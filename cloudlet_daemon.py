@@ -16,6 +16,7 @@ BUF_SIZE = 1024
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
+
 class cloudlet_handler(SocketServer.BaseRequestHandler):
 
     def recv_file(self, file_name, size):
@@ -56,19 +57,20 @@ class cloudlet_handler(SocketServer.BaseRequestHandler):
         if(cmd_type == 'init'):
             # do init job.
             self.task_id = str_array[1]
-            lable = str_array[2]
-            rstore_handle.init_restore(self.task_id, lable)
+            self.lable = str_array[2]
+            rstore_handle.init_restore(self.task_id, self.lable)
             self.send_msg('init:success')
+            logging.info("get int msg success\n")
 
         while(True):
             new_msg = self.recv_msg()
             str_array = new_msg.split('#')
-            # logging.debug(str_array)
 
             cmd_type = str_array[0]
 
             if(cmd_type == 'fs'):
-                fs_name = self.task_id + '-fs.tar.gz'
+                fs_time_start = time.time()
+                fs_name = self.task_id + '-fs.tar'
                 fs_size = int(str_array[1])
                 msg = "fs:"
                 if self.recv_file(fs_name, fs_size):
@@ -78,43 +80,62 @@ class cloudlet_handler(SocketServer.BaseRequestHandler):
                 self.send_msg(msg)
 
                 rstore_handle.restore_fs()
+                fs_time_end = time.time()
 
             if(cmd_type == 'premm'):
-                premm_name = self.task_id + '-pre.tar.gz'
-                premm_size = int(str_array[1])
-                #logging.info(premm_size)
-
+                pre_restore_time_start = time.time()
+                premm_name = self.task_id + str_array[1]+'.tar'
+                premm_size = int(str_array[2])
                 if not self.recv_file(premm_name, premm_size):
                     self.send_msg('premm:error')
                 else:
                     self.send_msg('premm:success')
 
-                #logging.debug('receive premm end..')
-                rstore_handle.premm_restore(premm_name)
+                logging.debug('receive premm end..')
+                rstore_handle.premm_restore(premm_name, str_array[1])
+                pre_restore_time_end = time.time()
 
             if(cmd_type == 'mm'):
-                mm_name = self.task_id + '-mm.tar.gz'
+                restore_time_start = time.time()
+                mm_name = self.task_id + '-mm.tar'
                 mm_size = int(str_array[1])
+                last_pre_dir = str_array[2]
+                if(last_pre_dir != 'pre0'):
+                    os.rename(last_pre_dir, 'pre')
+
                 if not self.recv_file(mm_name, mm_size):
                     self.send_msg('mm:error')
                 else:
                     self.send_msg('mm:success')
 
-                #logging.debug('receive mm end..')
+                restore_dump_img_time = time.time()
+
+                logging.debug('receive mm end..')
                 rstore_handle.restore(mm_name)
+                restore_end_time = time.time()
+
                 self.send_msg('restore:success')
                 break
 
-            #end_time = time.time()
-            #print('migration time: %s' % (end_time - start_time))
-            #print('migration end time: %s' % end_time)
+        # this is just for test.
+        '''
+        print('pre restore time:%f' %
+              (pre_restore_time_end - pre_restore_time_start))
+        print('recv file time:%f' %
+              (restore_dump_img_time - restore_time_start))
+        print('restore process time:%f' %
+              (restore_end_time - restore_dump_img_time))
+        '''
+        cmd = 'docker ps -a '
+        out = sp.call(cmd, shell=True)
+        print(out)
 
 
 class daemon:
 
     def run(self):
         host = ni.ifaddresses('eth1')[2][0]['addr']
-        port = 10021
+        #port is defined in cloudlet_utl
         logging.info(host)
         server = ThreadedTCPServer((host, port), cloudlet_handler)
         try:

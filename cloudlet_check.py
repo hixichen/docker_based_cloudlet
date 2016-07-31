@@ -64,12 +64,11 @@ def docker_py_check():
 
     cli = Client(version=docker_api_version)
     to_json = json.dumps(cli.info())
-    # print(to_json)
     json_info = json.loads(to_json)
     if json_info['Driver'] != 'aufs':
         logging.error('sorry,just support aufs now.')
         return False
-    print(json_info['OperatingSystem'] + ','),
+    logging.debug(json_info['OperatingSystem'] + ','),
     print(json_info['KernelVersion'])
     logging.debug('docker py works')
     return True
