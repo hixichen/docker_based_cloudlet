@@ -14,7 +14,9 @@ criu 2.2
 #[Dependency]:
 apt-get install python-dev
 
-apt-get install python-pip 
+easy_install pip
+
+apt-get install liblz4-tool
 
 pip install docker-py 
 
