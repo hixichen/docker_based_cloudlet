@@ -7,7 +7,7 @@ mail: chenx@andrew.cmu.edu
 
 python 2.7
 
-ubuntu 14.04
+ubuntu 15.04
 
 criu 2.2
 
